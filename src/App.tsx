@@ -1,27 +1,22 @@
-import { BrowserRouter, Link, Route, Routes } from "react-router";
+import { Container } from "@mui/material";
+import { BrowserRouter, Route, Routes } from "react-router";
+import Header from "./components/Header";
 import { SceneDisplayPage } from "./pages/SceneDisplayPage";
 import { SceneEditPage } from "./pages/SceneEditPage";
 import { SceneListPage } from "./pages/SceneListPage";
-import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="app">
-        <header className="app-header">
-          <Link to="/" className="app-title">
-            Daggerheart GM Tools
-          </Link>
-        </header>
-        <main className="app-main">
-          <Routes>
-            <Route path="/" element={<SceneListPage />} />
-            <Route path="/scenes/new/:type" element={<SceneEditPage />} />
-            <Route path="/scenes/:id/edit" element={<SceneEditPage />} />
-            <Route path="/scenes/:id" element={<SceneDisplayPage />} />
-          </Routes>
-        </main>
-      </div>
+      <Header />
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Routes>
+          <Route path="/" element={<SceneListPage />} />
+          <Route path="/scenes/new/:type" element={<SceneEditPage />} />
+          <Route path="/scenes/:id/edit" element={<SceneEditPage />} />
+          <Route path="/scenes/:id" element={<SceneDisplayPage />} />
+        </Routes>
+      </Container>
     </BrowserRouter>
   );
 }

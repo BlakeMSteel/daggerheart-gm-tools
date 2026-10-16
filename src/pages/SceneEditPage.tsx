@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router";
+import SceneTypeChip from "../components/SceneTypeChip";
 import { CombatEditor } from "../scenes/CombatEditor";
 import { ExplorationEditor } from "../scenes/ExplorationEditor";
 import { SocialEditor } from "../scenes/SocialEditor";
@@ -36,13 +38,16 @@ export function SceneEditPage() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  if (scene === undefined) return <p className="page muted">Loading…</p>;
+  if (scene === undefined)
+    return <Typography color="text.secondary">Loading…</Typography>;
   if (scene === null) {
     return (
-      <div className="page">
-        <p>Scene not found.</p>
-        <Link to="/">Back to scenes</Link>
-      </div>
+      <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+        <Typography>Scene not found.</Typography>
+        <Button component={Link} to="/">
+          Back to scenes
+        </Button>
+      </Stack>
     );
   }
 
@@ -71,41 +76,53 @@ export function SceneEditPage() {
   };
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <h1>
-          {isNew ? "New" : "Edit"} {SCENE_TYPE_LABELS[scene.type]} scene
-        </h1>
-        <div className="button-row">
-          {dirty && <span className="muted">Unsaved changes</span>}
-          <button type="button" onClick={handleBack}>
-            Back
-          </button>
-          {!isNew && (
-            <button type="button" className="danger" onClick={handleDelete}>
-              Delete
-            </button>
+    <Stack spacing={3}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            {isNew ? "New scene" : "Edit scene"}
+          </Typography>
+          <SceneTypeChip type={scene.type} />
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          {dirty && (
+            <Typography variant="body2" color="text.secondary">
+              Unsaved changes
+            </Typography>
           )}
-          <button
-            type="button"
-            className="primary"
+          <Button onClick={handleBack}>Back</Button>
+          {!isNew && (
+            <Button color="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          )}
+          <Button
+            variant="contained"
             onClick={handleSave}
             disabled={saving || (!dirty && !isNew)}
           >
             {saving ? "Saving…" : "Save"}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Stack>
+      </Box>
 
-      <label className="scene-name-field">
-        Scene name
-        <input
-          value={scene.name}
-          placeholder="Untitled scene"
-          autoFocus={isNew}
-          onChange={(e) => update({ ...scene, name: e.target.value })}
-        />
-      </label>
+      <TextField
+        label="Scene name"
+        size="small"
+        placeholder="Untitled scene"
+        autoFocus={isNew}
+        value={scene.name}
+        onChange={(e) => update({ ...scene, name: e.target.value })}
+        sx={{ maxWidth: 480 }}
+      />
 
       {scene.type === "social" && (
         <SocialEditor scene={scene} onChange={update} />
@@ -116,6 +133,6 @@ export function SceneEditPage() {
       {scene.type === "exploration" && (
         <ExplorationEditor scene={scene} onChange={update} />
       )}
-    </div>
+    </Stack>
   );
 }

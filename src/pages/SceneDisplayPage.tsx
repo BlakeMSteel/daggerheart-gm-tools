@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import { Link, useParams } from "react-router";
+import SceneTypeChip from "../components/SceneTypeChip";
 import { getScene } from "../scenes/db";
-import { SCENE_TYPE_LABELS, type Scene } from "../scenes/types";
+import type { Scene } from "../scenes/types";
 
 // Placeholder: display mode will be designed later.
 export function SceneDisplayPage() {
@@ -12,32 +14,50 @@ export function SceneDisplayPage() {
     if (id) getScene(id).then((s) => setScene(s ?? null));
   }, [id]);
 
-  if (scene === undefined) return <p className="page muted">Loading…</p>;
+  if (scene === undefined)
+    return <Typography color="text.secondary">Loading…</Typography>;
   if (scene === null) {
     return (
-      <div className="page">
-        <p>Scene not found.</p>
-        <Link to="/">Back to scenes</Link>
-      </div>
+      <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+        <Typography>Scene not found.</Typography>
+        <Button component={Link} to="/">
+          Back to scenes
+        </Button>
+      </Stack>
     );
   }
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <h1>{scene.name || "Untitled scene"}</h1>
-        <div className="button-row">
-          <Link className="button" to="/">
+    <Stack spacing={3}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            {scene.name || "Untitled scene"}
+          </Typography>
+          <SceneTypeChip type={scene.type} />
+        </Stack>
+        <Stack direction="row" spacing={1}>
+          <Button component={Link} to="/">
             Back
-          </Link>
-          <Link className="button primary" to={`/scenes/${scene.id}/edit`}>
+          </Button>
+          <Button
+            variant="contained"
+            component={Link}
+            to={`/scenes/${scene.id}/edit`}
+          >
             Edit
-          </Link>
-        </div>
-      </div>
-      <p className="muted">
-        {SCENE_TYPE_LABELS[scene.type]} scene — display mode coming soon.
-      </p>
-    </div>
+          </Button>
+        </Stack>
+      </Box>
+      <Typography color="text.secondary">Display mode coming soon.</Typography>
+    </Stack>
   );
 }
