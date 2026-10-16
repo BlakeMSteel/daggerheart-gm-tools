@@ -29,6 +29,8 @@ export interface Enemy {
   difficulty: number | null;
   hp: number | null;
   stress: number | null;
+  // Missing on enemies saved before minor thresholds were added; treat as blank.
+  minorThreshold?: number | null;
   majorThreshold: number | null;
   severeThreshold: number | null;
 }
@@ -70,6 +72,7 @@ export function newEnemy(): Enemy {
     difficulty: null,
     hp: null,
     stress: null,
+    minorThreshold: null,
     majorThreshold: null,
     severeThreshold: null,
   };

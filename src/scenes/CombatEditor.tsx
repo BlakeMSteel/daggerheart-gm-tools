@@ -16,6 +16,7 @@ type StatKey =
   | "difficulty"
   | "hp"
   | "stress"
+  | "minorThreshold"
   | "majorThreshold"
   | "severeThreshold";
 
@@ -23,6 +24,7 @@ const STATS: { key: StatKey; label: string }[] = [
   { key: "difficulty", label: "Difficulty" },
   { key: "hp", label: "HP" },
   { key: "stress", label: "Stress" },
+  { key: "minorThreshold", label: "Minor threshold" },
   { key: "majorThreshold", label: "Major threshold" },
   { key: "severeThreshold", label: "Severe threshold" },
 ];

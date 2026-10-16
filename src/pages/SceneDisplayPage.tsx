@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useParams } from "react-router";
-import SceneTypeChip from "../components/SceneTypeChip";
+import { CombatDisplay } from "../scenes/CombatDisplay";
 import { ExplorationDisplay } from "../scenes/ExplorationDisplay";
 import { SocialDisplay } from "../scenes/SocialDisplay";
 import { getScene } from "../scenes/db";
@@ -20,21 +20,13 @@ export function SceneDisplayPage() {
     return <Typography color="text.secondary">Loading…</Typography>;
   if (scene === null) return <Typography>Scene not found.</Typography>;
 
-  if (scene.type === "exploration") return <ExplorationDisplay scene={scene} />;
-  // Keyed so table state (e.g. who is present) resets when switching scenes.
-  if (scene.type === "social")
-    return <SocialDisplay key={scene.id} scene={scene} />;
-
-  // The Combat display is still to come.
-  return (
-    <Stack spacing={3}>
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          {scene.name || "Untitled scene"}
-        </Typography>
-        <SceneTypeChip type={scene.type} />
-      </Stack>
-      <Typography color="text.secondary">Display mode coming soon.</Typography>
-    </Stack>
-  );
+  switch (scene.type) {
+    case "exploration":
+      return <ExplorationDisplay scene={scene} />;
+    // Keyed so table state (e.g. who is present) resets when switching scenes.
+    case "social":
+      return <SocialDisplay key={scene.id} scene={scene} />;
+    case "combat":
+      return <CombatDisplay key={scene.id} scene={scene} />;
+  }
 }

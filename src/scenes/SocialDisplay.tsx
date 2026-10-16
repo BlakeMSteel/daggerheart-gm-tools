@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, ButtonBase, Typography } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import PersonOffIcon from "@mui/icons-material/PersonOff";
 import type { Npc, SocialScene } from "./types";
@@ -22,8 +22,27 @@ function NpcCard({ npc, present, onTogglePresent }: NpcCardProps) {
   const name = npc.name || "Unnamed NPC";
 
   return (
-    <Box sx={{ position: "relative", minWidth: 0, minHeight: 0 }}>
-      {/* The card itself fades when the NPC is absent; the toggle button stays fully visible. */}
+    <ButtonBase
+      component="div"
+      onClick={onTogglePresent}
+      aria-label={`${name} present`}
+      aria-pressed={present}
+      disableRipple
+      sx={{
+        position: "relative",
+        minWidth: 0,
+        minHeight: 0,
+        display: "block",
+        borderRadius: 2,
+        textAlign: "left",
+        "&.Mui-focusVisible": {
+          outline: 3,
+          outlineColor: "primary.main",
+          outlineOffset: 3,
+        },
+      }}
+    >
+      {/* The card itself fades when the NPC is absent; the presence icon stays fully visible. */}
       <Box
         sx={{
           position: "absolute",
@@ -59,7 +78,7 @@ function NpcCard({ npc, present, onTogglePresent }: NpcCardProps) {
             // Padding on top matches the fade, so the text always sits on full shade.
             pt: `${FADE}px`,
             pl: 2,
-            // Leave room for the presence button in the corner.
+            // Leave room for the presence icon in the corner.
             pr: 7,
             pb: 1.5,
             color: "#fff",
@@ -79,24 +98,22 @@ function NpcCard({ npc, present, onTogglePresent }: NpcCardProps) {
           )}
         </Box>
       </Box>
-      <Tooltip title={present ? "Mark as not present" : "Mark as present"}>
-        <IconButton
-          onClick={onTogglePresent}
-          aria-label={`${name} present`}
-          aria-pressed={present}
-          sx={{
-            position: "absolute",
-            right: 8,
-            bottom: 8,
-            color: present ? "primary.main" : "rgba(255, 255, 255, 0.85)",
-            bgcolor: "rgba(0, 0, 0, 0.5)",
-            "&:hover": { bgcolor: "rgba(0, 0, 0, 0.7)" },
-          }}
-        >
-          {present ? <PersonIcon /> : <PersonOffIcon />}
-        </IconButton>
-      </Tooltip>
-    </Box>
+      <Box
+        aria-hidden
+        sx={{
+          position: "absolute",
+          right: 8,
+          bottom: 8,
+          display: "flex",
+          p: 1,
+          borderRadius: "50%",
+          color: present ? "primary.main" : "rgba(255, 255, 255, 0.85)",
+          bgcolor: "rgba(0, 0, 0, 0.5)",
+        }}
+      >
+        {present ? <PersonIcon /> : <PersonOffIcon />}
+      </Box>
+    </ButtonBase>
   );
 }
 
