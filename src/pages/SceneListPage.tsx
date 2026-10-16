@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import EntryBox from "../components/EntryBox";
 import SceneTypeChip from "../components/SceneTypeChip";
 import { deleteScene, listScenes } from "../scenes/db";
-import { SCENE_TYPE_LABELS, type Scene, type SceneType } from "../scenes/types";
+import type { Scene } from "../scenes/types";
 
+/** /edit — lists saved scenes with create, edit and delete. */
 export function SceneListPage() {
-  const navigate = useNavigate();
   const [scenes, setScenes] = useState<Scene[] | null>(null);
 
   useEffect(() => {
@@ -36,18 +36,14 @@ export function SceneListPage() {
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           Scenes
         </Typography>
-        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-          {(Object.keys(SCENE_TYPE_LABELS) as SceneType[]).map((type) => (
-            <Button
-              key={type}
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => navigate(`/scenes/new/${type}`)}
-            >
-              New {SCENE_TYPE_LABELS[type]} scene
-            </Button>
-          ))}
-        </Stack>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          component={Link}
+          to="/edit/new"
+        >
+          New Scene
+        </Button>
       </Box>
 
       {scenes === null ? (
@@ -81,16 +77,9 @@ export function SceneListPage() {
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Button
                   size="small"
-                  component={Link}
-                  to={`/scenes/${scene.id}`}
-                >
-                  View
-                </Button>
-                <Button
-                  size="small"
                   variant="outlined"
                   component={Link}
-                  to={`/scenes/${scene.id}/edit`}
+                  to={`/edit/${scene.id}`}
                 >
                   Edit
                 </Button>

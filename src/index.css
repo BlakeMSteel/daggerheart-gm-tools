@@ -4,6 +4,19 @@
   box-sizing: border-box;
 }
 
+/* Fade colors when switching between the light (Edit) and dark (View) themes. */
+@media (prefers-reduced-motion: no-preference) {
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 300ms ease,
+      border-color 300ms ease,
+      color 300ms ease,
+      fill 300ms ease;
+  }
+}
+
 #root {
   min-height: 100dvh;
 }
