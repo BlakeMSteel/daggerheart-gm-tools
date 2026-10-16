@@ -3,6 +3,7 @@ import { Stack, Typography } from "@mui/material";
 import { useParams } from "react-router";
 import SceneTypeChip from "../components/SceneTypeChip";
 import { ExplorationDisplay } from "../scenes/ExplorationDisplay";
+import { SocialDisplay } from "../scenes/SocialDisplay";
 import { getScene } from "../scenes/db";
 import type { Scene } from "../scenes/types";
 
@@ -20,8 +21,11 @@ export function SceneDisplayPage() {
   if (scene === null) return <Typography>Scene not found.</Typography>;
 
   if (scene.type === "exploration") return <ExplorationDisplay scene={scene} />;
+  // Keyed so table state (e.g. who is present) resets when switching scenes.
+  if (scene.type === "social")
+    return <SocialDisplay key={scene.id} scene={scene} />;
 
-  // Social and Combat displays are still to come.
+  // The Combat display is still to come.
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
