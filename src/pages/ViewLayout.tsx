@@ -7,6 +7,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Stack,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -16,6 +17,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { Link, Outlet, useParams } from "react-router";
+import FearTracker, { MAX_FEAR } from "../components/FearTracker";
 import { listScenes } from "../scenes/db";
 import {
   SCENE_TYPE_COLORS,
@@ -24,7 +26,26 @@ import {
 } from "../scenes/types";
 
 const SIDEBAR_WIDTH = 280;
+const RAIL_WIDTH = 56;
 const COLLAPSED_KEY = "view-sidebar-collapsed";
+const FEAR_KEY = "gm-fear";
+
+function loadFear(): number {
+  try {
+    const fear = Number(localStorage.getItem(FEAR_KEY));
+    return Number.isInteger(fear) ? Math.min(Math.max(fear, 0), MAX_FEAR) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function saveFear(fear: number) {
+  try {
+    localStorage.setItem(FEAR_KEY, String(fear));
+  } catch {
+    // storage unavailable; Fear just won't survive a reload
+  }
+}
 
 function loadCollapsed(): boolean {
   try {
@@ -50,6 +71,13 @@ export function ViewLayout() {
   const [scenes, setScenes] = useState<Scene[] | null>(null);
   const [collapsed, setCollapsed] = useState(loadCollapsed);
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Fear is session-wide, so it lives here (not per scene) and survives reloads.
+  const [fear, setFearState] = useState(loadFear);
+  const setFear = (next: number) => {
+    setFearState(next);
+    saveFear(next);
+  };
+  const fearTracker = <FearTracker value={fear} onChange={setFear} />;
 
   useEffect(() => {
     listScenes().then(setScenes);
@@ -141,62 +169,58 @@ export function ViewLayout() {
           </List>
         )}
       </Box>
+      <Box sx={{ borderTop: 1, borderColor: "divider", py: 1 }}>
+        {fearTracker}
+      </Box>
     </Box>
   );
 
+  // Collapsed: a narrow rail holding the menu button, so it never covers the scene.
+  const rail = (
+    <Stack spacing={2} sx={{ width: RAIL_WIDTH, alignItems: "center", py: 1 }}>
+      <Tooltip title="Show scenes" placement="right">
+        <IconButton onClick={() => setOpen(true)} aria-label="Show scenes">
+          <MenuIcon />
+        </IconButton>
+      </Tooltip>
+      {fearTracker}
+    </Stack>
+  );
+
+  const expanded = open && !isMobile;
+
   return (
     <Box sx={{ display: "flex", minHeight: "100dvh" }}>
-      {isMobile ? (
+      {isMobile && (
         <Drawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
           {sceneList}
         </Drawer>
-      ) : (
-        <Box
-          component="nav"
-          sx={{
-            flexShrink: 0,
-            width: open ? SIDEBAR_WIDTH : 0,
-            position: "sticky",
-            top: 0,
-            height: "100dvh",
-            overflow: "hidden",
-            borderRight: open ? 1 : 0,
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            transition: theme.transitions.create(
-              ["width", "background-color"],
-              { duration: 300 },
-            ),
-          }}
-        >
-          {sceneList}
-        </Box>
       )}
+      <Box
+        component="nav"
+        sx={{
+          flexShrink: 0,
+          width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH,
+          position: "sticky",
+          top: 0,
+          height: "100dvh",
+          overflow: "hidden",
+          borderRight: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          transition: theme.transitions.create(["width", "background-color"], {
+            duration: 300,
+          }),
+        }}
+      >
+        {expanded ? sceneList : rail}
+      </Box>
       {/* Positioned so full-bleed displays (e.g. Exploration) can fill this area.
           Clicking here collapses the sidebar; on phones the Drawer's backdrop does the same. */}
       <Box
-        onClick={() => open && !isMobile && setOpen(false)}
+        onClick={() => expanded && setOpen(false)}
         sx={{ position: "relative", flex: 1, minWidth: 0, p: 3 }}
       >
-        {!open && (
-          <Tooltip title="Show scenes">
-            <IconButton
-              onClick={() => setOpen(true)}
-              aria-label="Show scenes"
-              sx={{
-                position: "fixed",
-                top: 8,
-                left: 8,
-                zIndex: (theme) => theme.zIndex.speedDial,
-                bgcolor: "background.paper",
-                boxShadow: 3,
-                "&:hover": { bgcolor: "background.paper", boxShadow: 6 },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-          </Tooltip>
-        )}
         <Outlet />
       </Box>
     </Box>
