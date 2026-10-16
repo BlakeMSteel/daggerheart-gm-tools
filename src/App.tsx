@@ -14,6 +14,7 @@ import {
 } from "react-router";
 import Header from "./components/Header";
 import { NewScenePage } from "./pages/NewScenePage";
+import { PlayerFearPage } from "./pages/PlayerFearPage";
 import { SceneDisplayPage } from "./pages/SceneDisplayPage";
 import { SceneEditPage } from "./pages/SceneEditPage";
 import { SceneListPage } from "./pages/SceneListPage";
@@ -30,13 +31,14 @@ function EditLayout() {
 
 function Layout() {
   const { pathname } = useLocation();
-  const isView = pathname.startsWith("/view");
+  // At-the-table pages (View, and the players' Fear page) are dark with no header.
+  const isTable = pathname.startsWith("/view") || pathname.startsWith("/fear");
 
   return (
-    <ThemeProvider theme={isView ? darkTheme : lightTheme}>
+    <ThemeProvider theme={isTable ? darkTheme : lightTheme}>
       <CssBaseline />
-      {/* View mode has no header; its sidebar links back to Edit. */}
-      {!isView && <Header />}
+      {/* View mode's sidebar links back to Edit; players have no need for it. */}
+      {!isTable && <Header />}
       <Routes>
         <Route path="/edit" element={<EditLayout />}>
           <Route index element={<SceneListPage />} />
@@ -52,6 +54,7 @@ function Layout() {
           />
           <Route path=":id" element={<SceneDisplayPage />} />
         </Route>
+        <Route path="/fear/:code" element={<PlayerFearPage />} />
         <Route path="*" element={<Navigate to="/edit" replace />} />
       </Routes>
     </ThemeProvider>

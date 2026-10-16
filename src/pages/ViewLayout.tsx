@@ -14,10 +14,13 @@ import {
   useTheme,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import GroupsIcon from "@mui/icons-material/Groups";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { Link, Outlet, useParams } from "react-router";
 import FearTracker, { MAX_FEAR } from "../components/FearTracker";
+import ShareFearDialog from "../components/ShareFearDialog";
+import { newShareCode, useFearChannel } from "../sync/fearChannel";
 import { listScenes } from "../scenes/db";
 import {
   SCENE_TYPE_COLORS,
@@ -29,6 +32,23 @@ const SIDEBAR_WIDTH = 280;
 const RAIL_WIDTH = 56;
 const COLLAPSED_KEY = "view-sidebar-collapsed";
 const FEAR_KEY = "gm-fear";
+const SHARE_CODE_KEY = "fear-share-code";
+
+function loadShareCode(): string | null {
+  try {
+    return localStorage.getItem(SHARE_CODE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveShareCode(code: string) {
+  try {
+    localStorage.setItem(SHARE_CODE_KEY, code);
+  } catch {
+    // storage unavailable; a new code is made after a reload
+  }
+}
 
 function loadFear(): number {
   try {
@@ -73,11 +93,59 @@ export function ViewLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   // Fear is session-wide, so it lives here (not per scene) and survives reloads.
   const [fear, setFearState] = useState(loadFear);
-  const setFear = (next: number) => {
-    setFearState(next);
-    saveFear(next);
+  const updateFear = (change: (fear: number) => number) =>
+    setFearState((prev) => {
+      const next = Math.min(Math.max(change(prev), 0), MAX_FEAR);
+      saveFear(next);
+      return next;
+    });
+
+  // Players with the share link add Fear here; this page owns the total.
+  const [shareCode, setShareCode] = useState(loadShareCode);
+  const [shareOpen, setShareOpen] = useState(false);
+  const { status: shareStatus, send } = useFearChannel(
+    shareCode,
+    (message, reply) => {
+      if (
+        message.type === "add" &&
+        Number.isInteger(message.amount) &&
+        message.amount > 0
+      ) {
+        updateFear((f) => f + message.amount);
+      } else if (message.type === "request") {
+        reply({ type: "total", value: fear });
+      }
+    },
+  );
+
+  // Keep players' pages showing the current total.
+  useEffect(() => {
+    if (shareStatus === "live") send({ type: "total", value: fear });
+  }, [fear, shareStatus, send]);
+
+  const createShareCode = () => {
+    const code = newShareCode();
+    setShareCode(code);
+    saveShareCode(code);
   };
-  const fearTracker = <FearTracker value={fear} onChange={setFear} />;
+
+  const fearTracker = (
+    <Stack sx={{ alignItems: "center" }}>
+      <FearTracker value={fear} onChange={(next) => updateFear(() => next)} />
+      <Tooltip title="Share Fear with players" placement="right">
+        <IconButton
+          size="small"
+          onClick={() => setShareOpen(true)}
+          aria-label="Share Fear with players"
+          sx={{
+            color: shareStatus === "live" ? "primary.main" : "text.secondary",
+          }}
+        >
+          <GroupsIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  );
 
   useEffect(() => {
     listScenes().then(setScenes);
@@ -191,6 +259,13 @@ export function ViewLayout() {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100dvh" }}>
+      <ShareFearDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        code={shareCode}
+        status={shareStatus}
+        onNewCode={createShareCode}
+      />
       {isMobile && (
         <Drawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
           {sceneList}

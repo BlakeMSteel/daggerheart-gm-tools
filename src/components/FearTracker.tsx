@@ -4,7 +4,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 
 /** The most Fear the GM can hold, per the core rules. */
 export const MAX_FEAR = 12;
-const FEAR_COLOR = "#b388ff";
+export const FEAR_COLOR = "#b388ff";
 
 interface FearTrackerProps {
   value: number;
