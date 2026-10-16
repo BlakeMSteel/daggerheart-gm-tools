@@ -7,7 +7,7 @@ import { SceneListPage } from "./pages/SceneListPage";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Header />
       <Container maxWidth="lg" sx={{ py: 3 }}>
         <Routes>
