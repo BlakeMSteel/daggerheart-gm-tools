@@ -161,7 +161,8 @@ export function ViewLayout() {
           {sceneList}
         </Box>
       )}
-      <Box sx={{ flex: 1, minWidth: 0, p: 3 }}>
+      {/* Positioned so full-bleed displays (e.g. Exploration) can fill this area. */}
+      <Box sx={{ position: "relative", flex: 1, minWidth: 0, p: 3 }}>
         {!open && (
           <Tooltip title="Show scenes">
             <IconButton
