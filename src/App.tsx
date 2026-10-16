@@ -30,12 +30,13 @@ function EditLayout() {
 
 function Layout() {
   const { pathname } = useLocation();
-  const theme = pathname.startsWith("/view") ? darkTheme : lightTheme;
+  const isView = pathname.startsWith("/view");
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={isView ? darkTheme : lightTheme}>
       <CssBaseline />
-      <Header />
+      {/* View mode has no header; its sidebar links back to Edit. */}
+      {!isView && <Header />}
       <Routes>
         <Route path="/edit" element={<EditLayout />}>
           <Route index element={<SceneListPage />} />

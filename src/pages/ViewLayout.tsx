@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Box,
+  Button,
   Drawer,
   IconButton,
   List,
@@ -11,10 +12,10 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { Link, Outlet, useParams } from "react-router";
-import { TOOLBAR_HEIGHT } from "../components/Header";
 import { listScenes } from "../scenes/db";
 import {
   SCENE_TYPE_COLORS,
@@ -83,9 +84,15 @@ export function ViewLayout() {
           py: 1,
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-          Scenes
-        </Typography>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<EditIcon />}
+          component={Link}
+          to="/edit"
+        >
+          Edit
+        </Button>
         <Tooltip title="Hide scenes">
           <IconButton
             size="small"
@@ -96,6 +103,12 @@ export function ViewLayout() {
           </IconButton>
         </Tooltip>
       </Box>
+      <Typography
+        variant="subtitle2"
+        sx={{ fontWeight: 700, px: 2, pt: 1, pb: 0.5 }}
+      >
+        Scenes
+      </Typography>
       <Box sx={{ flex: 1, overflowY: "auto" }}>
         {scenes === null ? (
           <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
@@ -132,9 +145,7 @@ export function ViewLayout() {
   );
 
   return (
-    <Box
-      sx={{ display: "flex", minHeight: `calc(100dvh - ${TOOLBAR_HEIGHT}px)` }}
-    >
+    <Box sx={{ display: "flex", minHeight: "100dvh" }}>
       {isMobile ? (
         <Drawer open={mobileOpen} onClose={() => setMobileOpen(false)}>
           {sceneList}
@@ -146,8 +157,8 @@ export function ViewLayout() {
             flexShrink: 0,
             width: open ? SIDEBAR_WIDTH : 0,
             position: "sticky",
-            top: TOOLBAR_HEIGHT,
-            height: `calc(100dvh - ${TOOLBAR_HEIGHT}px)`,
+            top: 0,
+            height: "100dvh",
             overflow: "hidden",
             borderRight: open ? 1 : 0,
             borderColor: "divider",
@@ -161,8 +172,12 @@ export function ViewLayout() {
           {sceneList}
         </Box>
       )}
-      {/* Positioned so full-bleed displays (e.g. Exploration) can fill this area. */}
-      <Box sx={{ position: "relative", flex: 1, minWidth: 0, p: 3 }}>
+      {/* Positioned so full-bleed displays (e.g. Exploration) can fill this area.
+          Clicking here collapses the sidebar; on phones the Drawer's backdrop does the same. */}
+      <Box
+        onClick={() => open && !isMobile && setOpen(false)}
+        sx={{ position: "relative", flex: 1, minWidth: 0, p: 3 }}
+      >
         {!open && (
           <Tooltip title="Show scenes">
             <IconButton
@@ -170,7 +185,7 @@ export function ViewLayout() {
               aria-label="Show scenes"
               sx={{
                 position: "fixed",
-                top: TOOLBAR_HEIGHT + 8,
+                top: 8,
                 left: 8,
                 zIndex: (theme) => theme.zIndex.speedDial,
                 bgcolor: "background.paper",
